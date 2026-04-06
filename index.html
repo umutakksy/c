@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C Programlama — Hafıza Kartı Tabloları</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1117;
+    --surface: #161b22;
+    --surface2: #1c2230;
+    --border: #2a3140;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent1: #58a6ff;
+    --accent2: #7ee787;
+    --accent3: #d2a8ff;
+    --accent4: #ffa657;
+    --accent5: #ff7b72;
+    --accent6: #79c0ff;
+    --accent7: #f778ba;
+    --code-bg: #0d1117;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    padding: 50px 20px 40px;
+    position: relative;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 200px; height: 3px;
+    background: linear-gradient(90deg, var(--accent1), var(--accent3), var(--accent7));
+    border-radius: 2px;
+  }
+
+  .header h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent1), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .header p {
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-size: 0.95rem;
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 0 auto 40px;
+    max-width: 900px;
+  }
+
+  .nav a {
+    padding: 6px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .nav a:hover {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--accent1);
+  }
+
+  .section {
+    max-width: 1100px;
+    margin: 0 auto 50px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+  }
+
+  .section-title h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  tbody td {
+    padding: 11px 16px;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover { background: rgba(88,166,255,0.04); }
+
+  td:first-child {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    background: var(--code-bg);
+    padding: 2px 7px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    color: var(--accent6);
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .tag-ok { background: rgba(126,231,135,0.12); color: var(--accent2); }
+  .tag-bad { background: rgba(255,123,114,0.12); color: var(--accent5); }
+  .tag-warn { background: rgba(255,166,87,0.12); color: var(--accent4); }
+  .tag-info { background: rgba(88,166,255,0.12); color: var(--accent1); }
+
+  /* color coded sections */
+  .c1 thead th { background: rgba(88,166,255,0.1); color: var(--accent1); }
+  .c2 thead th { background: rgba(126,231,135,0.1); color: var(--accent2); }
+  .c3 thead th { background: rgba(210,168,255,0.1); color: var(--accent3); }
+  .c4 thead th { background: rgba(255,166,87,0.1); color: var(--accent4); }
+  .c5 thead th { background: rgba(255,123,114,0.1); color: var(--accent5); }
+  .c6 thead th { background: rgba(121,192,255,0.1); color: var(--accent6); }
+  .c7 thead th { background: rgba(247,120,186,0.1); color: var(--accent7); }
+
+  .n1 { background: rgba(88,166,255,0.15); color: var(--accent1); }
+  .n2 { background: rgba(126,231,135,0.15); color: var(--accent2); }
+  .n3 { background: rgba(210,168,255,0.15); color: var(--accent3); }
+  .n4 { background: rgba(255,166,87,0.15); color: var(--accent4); }
+  .n5 { background: rgba(255,123,114,0.15); color: var(--accent5); }
+  .n6 { background: rgba(121,192,255,0.15); color: var(--accent6); }
+  .n7 { background: rgba(247,120,186,0.15); color: var(--accent7); }
+
+  tbody td { background: var(--surface); }
+
+  .tip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent4);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  .tip strong { color: var(--accent4); }
+
+  @media (max-width: 700px) {
+    body { padding: 10px; }
+    table { font-size: 0.82rem; }
+    thead th, tbody td { padding: 8px 10px; }
+    td:first-child { white-space: normal; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>C Programlama — Hafıza Kartı Tabloları</h1>
+  <p>Tüm konular · Hızlı tekrar · Sınava hazırlık</p>
+</div>
+
+<div class="nav">
+  <a href="#s1">Fonksiyonlar</a>
+  <a href="#s2">Saklama Sınıfları</a>
+  <a href="#s3">Bellek Düzeni</a>
+  <a href="#s4">Rekürsiyon</a>
+  <a href="#s5">İşaretçiler</a>
+  <a href="#s6">Dinamik Bellek</a>
+  <a href="#s7">Diziler & İşaretçiler</a>
+  <a href="#s8">String Fonksiyonları</a>
+  <a href="#s9">Fonksiyon İşaretçileri</a>
+  <a href="#s10">const İşaretçiler</a>
+  <a href="#s11">Bubble Sort</a>
+  <a href="#s12">Hatalar</a>
+</div>
+
+<!-- ===================== 1. FONKSİYONLAR ===================== -->
+<div class="section" id="s1">
+  <div class="section-title">
+    <span class="section-num n1">01</span>
+    <h2>Fonksiyonlar</h2>
+  </div>
+
+  <table class="c1">
+    <thead><tr><th style="width:28%">Kavram</th><th>Açıklama</th><th style="width:28%">Örnek / Kural</th></tr></thead>
+    <tbody>
+      <tr><td>Fonksiyon nedir?</td><td>Tekrar kullanılabilir kod blokları; büyük problemi küçük parçalara böler</td><td>Böl → Yönet → Tekrar Kullan</td></tr>
+      <tr><td>Söz dizimi</td><td><code>tip ad(param) { ... return; }</code></td><td><code>int topla(int a, int b) { return a+b; }</code></td></tr>
+      <tr><td>Geri dönüş yolları</td><td>3 yol: <code>}</code> (void), <code>return;</code> (void), <code>return ifade;</code></td><td>void fonksiyonlarda return opsiyonel</td></tr>
+      <tr><td>Yerel değişken</td><td>Fonksiyon içindeki TÜM değişkenler yereldir; parametreler de yereldir</td><td>Fonksiyon bitince silinir</td></tr>
+      <tr><td>Prototip</td><td>Fonksiyonun dönüş tipi + adı + parametre tiplerini önceden bildirir</td><td><code>int topla(int, int);</code></td></tr>
+      <tr><td>Prototip şart mı?</td><td>Fonksiyon kullanılmadan önce ya prototip ya da tanım olmalı</td><td><span class="tag tag-bad">Yoksa derleme hatası</span></td></tr>
+      <tr><td>Dizi gönderme</td><td>Dizi adı = adres → <strong>Pass by Reference</strong> → orijinal değişir</td><td><code>void f(int arr[], int n)</code></td></tr>
+      <tr><td>Eleman gönderme</td><td>Tek eleman → <strong>Pass by Value</strong> → orijinal değişmez</td><td><code>f(arr[5], 10)</code></td></tr>
+      <tr><td>2D dizi parametre</td><td>İlk boyut hariç diğerleri belirtilmeli</td><td><code>void f(int [][4], int row)</code></td></tr>
+      <tr><td>Header dosyaları</td><td>Hazır fonksiyon kütüphaneleri</td><td><code>stdio.h</code> <code>stdlib.h</code> <code>string.h</code> <code>math.h</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===================== 2. SAKLAMA SINIFLARI ===================== -->
+<div class="section" id="s2">
+  <div class="section-title">
+    <span class="section-num n2">02</span>
+    <h2>Saklama Sınıfları</h2>
+  </div>
+
+  <table class="c2">
+    <thead><tr><th>Sınıf</th><th>Saklama Yeri</th><th>Başlangıç Değeri</th><th>Kapsam</th><th>Ömür</th></tr></thead>
+    <tbody>
+      <tr><td><code>auto</code></td><td>Stack</td><td><span class="tag tag-warn">Garbage (tanımsız)</span></td><td>Blok içi</td><td>Blok sonuna kadar</td></tr>
+      <tr><td><code>extern</code></td><td>Data Segment</td><td><span class="tag tag-ok">0</span></td><td>Global / Çoklu dosya</td><td>Program sonuna kadar</td></tr>
+      <tr><td><code>static</code></td><td>Data Segment</td><td><span class="tag tag-ok">0</span></td><td>Blok içi</td><td>Program sonuna kadar</td></tr>
+      <tr><td><code>register</code></td><td>CPU Yazmaç</td><td><span class="tag tag-warn">Garbage (tanımsız)</span></td><td>Blok içi</td><td>Blok sonuna kadar</td></tr>
+    </tbody>
+  </table>
+
+  <table class="c2">
+    <thead><tr><th style="width:22%">Sınıf</th><th>Önemli Detay</th><th style="width:32%">Kilit Nokta</th></tr></thead>
+    <tbody>
+      <tr><td><code>auto</code></td><td>Varsayılan; yazmaya gerek yok. Global/parametre auto olamaz</td><td>Fonksiyon bitince bellekten silinir</td></tr>
+      <tr><td><code>extern</code></td><td>Başka dosyadaki global değişkeni kullanmak için</td><td><code>extern int x;</code> → tanım değil, tanıtım</td></tr>
+      <tr><td><code>static</code></td><td>Değeri çağrılar arasında korunur; ilk çağrıda 1 kez başlatılır</td><td>Sayaç örneği: her çağrıda artar</td></tr>
+      <tr><td><code>register</code></td><td>Derleyiciye ipucu (garanti yok); adres alınamaz (<code>&</code> yasak)</td><td>Döngü sayaçları için idealdir</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===================== 3. BELLEK DÜZENİ ===================== -->
+<div class="section" id="s3">
+  <div class="section-title">
+    <span class="section-num n3">03</span>
+    <h2>Bellek Düzeni</h2>
+  </div>
+
+  <table class="c3">
+    <thead><tr><th>Bölge</th><th>İçerik</th><th>Yön</th><th>Özellik</th></tr></thead>
+    <tbody>
+      <tr><td><strong>STACK</strong> (en üst)</td><td>auto değişkenler, parametreler, dönüş adresleri</td><td>↓ Aşağı büyür</td><td>Fonksiyon bitince frame silinir</td></tr>
+      <tr><td><strong>HEAP</strong></td><td>malloc / calloc / realloc ile tahsis edilen bellek</td><td>↑ Yukarı büyür</td><td>Programcı yönetir → <code>free()</code></td></tr>
+      <tr><td><strong>BSS</strong></td><td>Başlatılmamış global & static değişkenler</td><td>Sabit</td><td>Kernel 0'larla doldurur</td></tr>
+      <tr><td><strong>DATA</strong></td><td>Başlatılmış global & static değişkenler</td><td>Sabit</td><td><code>int g = 5;</code> <code>static int i = 100;</code></td></tr>
+      <tr><td><strong>TEXT</strong> (en alt)</td><td>Derlenmiş makine kodu</td><td>Sabit</td><td>Salt okunur, paylaşılabilir</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip"><strong>💡 Hatırla:</strong> Adresler → TEXT en düşük, DATA/BSS düşük, HEAP orta, STACK en yüksek.</div>
+</div>
+
+<!-- ===================== 4. REKÜRSİF FONKSİYONLAR ===================== -->
+<div class="section" id="s4">
+  <div class="section-title">
+    <span class="section-num n4">04</span>
+    <h2>Rekürsif Fonksiyonlar</h2>
+  </div>
+
+  <table class="c4">
+    <thead><tr><th style="width:25%">Kavram</th><th>Açıklama</th><th style="width:30%">Örnek</th></tr></thead>
+    <tbody>
+      <tr><td>Temel durum (Base Case)</td><td>Durma şartı — yoksa sonsuz döngü → stack overflow</td><td><code>if (n == 0) return;</code></td></tr>
+      <tr><td>Rekürsif çağrı</td><td>Problemi küçülterek kendini çağırır</td><td><code>return n * fakt(n-1);</code></td></tr>
+      <tr><td>Faktöriyel</td><td><code>n! = n × (n-1)!</code>, <code>0! = 1</code></td><td><code>5! = 5×4×3×2×1 = 120</code></td></tr>
+      <tr><td>Fibonacci</td><td><code>fib(n) = fib(n-1) + fib(n-2)</code></td><td>0, 1, 1, 2, 3, 5, 8, 13, 21, 34…</td></tr>
+      <tr><td>Fibonacci uyarısı</td><td>Aynı değerler tekrar hesaplanır → çok yavaş</td><td><span class="tag tag-bad">fib(30) → 2M+ çağrı</span></td></tr>
+      <tr><td>Stack mekanizması</td><td>Her çağrıda yeni stack frame: parametre + lokal + dönüş adresi</td><td>Fonksiyon bitince frame silinir</td></tr>
+    </tbody>
+  </table>
+
+  <table class="c4">
+    <thead><tr><th>Özellik</th><th>Rekürsif</th><th>İteratif</th></tr></thead>
+    <tbody>
+      <tr><td>Okunabilirlik</td><td><span class="tag tag-ok">Kolay (matematiksel)</span></td><td>Daha uzun</td></tr>
+      <tr><td>Bellek</td><td><span class="tag tag-bad">Fazla (stack frame)</span></td><td><span class="tag tag-ok">Az</span></td></tr>
+      <tr><td>Hız</td><td><span class="tag tag-bad">Genellikle yavaş</span></td><td><span class="tag tag-ok">Genellikle hızlı</span></td></tr>
+      <tr><td>Stack Overflow</td><td><span class="tag tag-bad">Risk var</span></td><td><span class="tag tag-ok">Risk yok</span></td></tr>
+      <tr><td>Kullanım alanı</td><td>Ağaçlar, graflar, matematik</td><td>Döngü işlemleri</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===================== 5. İŞARETÇİLER ===================== -->
+<div class="section" id="s5">
+  <div class="section-title">
+    <span class="section-num n5">05</span>
+    <h2>İşaretçiler (Pointers)</h2>
+  </div>
+
+  <table class="c5">
+    <thead><tr><th style="width:25%">Kavram</th><th>Açıklama</th><th style="width:30%">Örnek</th></tr></thead>
+    <tbody>
+      <tr><td><code>&</code> operatörü</td><td>Değişkenin bellek adresini verir</td><td><code>&x</code> → x'in adresi</td></tr>
+      <tr><td><code>*</code> operatörü</td><td>Adresteki değere erişir (dereference)</td><td><code>*p</code> → p'nin gösterdiği değer</td></tr>
+      <tr><td>Tanımlama</td><td><code>tip *isim;</code></td><td><code>int *p; char *c; float *f;</code></td></tr>
+      <tr><td>Çoklu tanım tuzağı</td><td><code>int *p1, p2;</code> → p2 normal int!</td><td><span class="tag tag-ok">Doğru:</span> <code>int *p1, *p2;</code></td></tr>
+      <tr><td>Temel eşdeğerlik</td><td><code>p = &x</code> ise <code>*p == x</code></td><td><code>*(&x) == x</code>, <code>&(*p) == &x</code></td></tr>
+      <tr><td>NULL pointer</td><td>Hiçbir yere işaret etmiyor; dereference → crash</td><td>Kullanmadan önce <code>if (p != NULL)</code></td></tr>
+      <tr><td>Pointer to Pointer</td><td><code>int **pp = &p;</code> → iki kez dereference</td><td><code>**pp == *p == val</code></td></tr>
+    </tbody>
+  </table>
+
+  <table class="c5">
+    <thead><tr><th>İşaretçi Aritmetiği</th><th>Formül</th><th>Örnekler</th></tr></thead>
+    <tbody>
+      <tr><td><code>ptr + n</code></td><td>adres + n × sizeof(tip)</td><td>int* 20000 + 5 = 20020</td></tr>
+      <tr><td><code>ptr++</code></td><td>adres + 1 × sizeof(tip)</td><td>char* 10000++ → 10001; int* 20000++ → 20004</td></tr>
+      <tr><td><code>ptr - n</code></td><td>adres − n × sizeof(tip)</td><td>double* 30000 − 3 = 29976</td></tr>
+      <tr><td>sizeof değerleri</td><td>char=1, int=4, float=4, double=8, pointer=8 (64-bit)</td><td>Aritmetik otomatik tip boyutuna göre hesaplanır</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===================== 6. DİNAMİK BELLEK ===================== -->
+<div class="section" id="s6">
+  <div class="section-title">
+    <span class="section-num n6">06</span>
+    <h2>Dinamik Bellek Tahsisi</h2>
+  </div>
+
+  <table class="c6">
+    <thead><tr><th>Fonksiyon</th><th>Açıklama</th><th>Söz Dizimi</th><th>Başlangıç</th></tr></thead>
+    <tbody>
+      <tr><td><code>malloc()</code></td><td>Bellek iste (başlatmaz)</td><td><code>(int*)malloc(n * sizeof(int))</code></td><td><span class="tag tag-warn">Garbage</span></td></tr>
+      <tr><td><code>calloc()</code></td><td>Bellek iste + sıfırla</td><td><code>(int*)calloc(n, sizeof(int))</code></td><td><span class="tag tag-ok">0</span></td></tr>
+      <tr><td><code>realloc()</code></td><td>Boyut değiştir (veri korunur)</td><td><code>(int*)realloc(p, yeni_boyut)</code></td><td>Eski veri korunur</td></tr>
+      <tr><td><code>free()</code></td><td>Belleği geri ver</td><td><code>free(p); p = NULL;</code></td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <table class="c6">
+    <thead><tr><th style="width:25%">Hata Türü</th><th>Sorun</th><th style="width:32%">Çözüm</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tag-bad">Memory Leak</span></td><td><code>free()</code> çağrılmamış</td><td>Her malloc → free eşleştir</td></tr>
+      <tr><td><span class="tag tag-bad">NULL kontrol yok</span></td><td>malloc başarısız → NULL dereference → crash</td><td><code>if (p == NULL) return 1;</code></td></tr>
+      <tr><td><span class="tag tag-bad">Double Free</span></td><td>Aynı bellek 2 kez free → crash</td><td>free sonrası <code>p = NULL;</code></td></tr>
+      <tr><td><span class="tag tag-bad">Buffer Overflow</span></td><td>Tahsis sınırı dışına yazma</td><td>Döngü sınırını doğru tut</td></tr>
+      <tr><td><span class="tag tag-bad">Dangling Pointer</span></td><td>Yerel değişken adresi döndürme</td><td>Parametre ile gelen adresi döndür</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip"><strong>💡 Altın Kural:</strong> Her <code>malloc</code> / <code>calloc</code> → mutlaka <code>free</code>. Her <code>free</code> → mutlaka <code>p = NULL;</code></div>
+</div>
+
+<!-- ===================== 7. DİZİLER VE İŞARETÇİLER ===================== -->
+<div class="section" id="s7">
+  <div class="section-title">
+    <span class="section-num n7">07</span>
+    <h2>Diziler & İşaretçiler</h2>
+  </div>
+
+  <table class="c7">
+    <thead><tr><th style="width:28%">Kavram</th><th>Açıklama</th><th style="width:28%">Örnek</th></tr></thead>
+    <tbody>
+      <tr><td>Dizi adı = adres</td><td><code>arr == &arr[0]</code> → ilk elemanın adresi</td><td>Dizi adı sabit işaretçi gibidir</td></tr>
+      <tr><td>arr vs *p farkı</td><td><code>arr</code> sabit (değiştirilemez), <code>p</code> değişken</td><td><code>p = arr;</code> ✅ <code>arr = p;</code> ❌</td></tr>
+      <tr><td>4 erişim yolu</td><td>Hepsi aynı elemana erişir</td><td><code>arr[i]</code> <code>*(arr+i)</code> <code>p[i]</code> <code>*(p+i)</code></td></tr>
+      <tr><td>2D dizi bellekte</td><td>Satır ardına satır (row-major) saklanır</td><td><code>m[i][j] = *(p + i*sütun + j)</code></td></tr>
+      <tr><td>İşaretçi dizisi vs 2D</td><td><code>char *g[]</code> daha verimli; <code>char g[7][15]</code> boşa yer harcar</td><td>String dizileri için işaretçi dizisi tercih</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===================== 8. STRING FONKSİYONLARI ===================== -->
+<div class="section" id="s8">
+  <div class="section-title">
+    <span class="section-num n1">08</span>
+    <h2>String Fonksiyonları</h2>
+  </div>
+
+  <table class="c1">
+    <thead><tr><th>Fonksiyon</th><th>İşlev</th><th>Söz Dizimi</th><th>Dikkat</th></tr></thead>
+    <tbody>
+      <tr><td><code>strlen(s)</code></td><td>Uzunluk (\0 hariç)</td><td><code>strlen("Abc")</code> → 3</td><td>—</td></tr>
+      <tr><td><code>strcpy(h, k)</code></td><td>k'yı h'ye kopyala</td><td><code>strcpy(dest, src)</code></td><td><span class="tag tag-bad">Overflow riski</span> → strncpy kullan</td></tr>
+      <tr><td><code>strcmp(a, b)</code></td><td>Karşılaştır</td><td>&lt;0: a önce, 0: eşit, &gt;0: b önce</td><td>Alfabetik (ASCII) sıraya göre</td></tr>
+      <tr><td><code>strcat(a, b)</code></td><td>b'yi a'nın sonuna ekle</td><td><code>strcat(s1, s2)</code></td><td>s1 yeterince büyük olmalı</td></tr>
+      <tr><td><code>strstr(m, a)</code></td><td>m içinde a'yı ara</td><td>Bulursa adres, bulamazsa NULL</td><td>Konum: <code>bulundu - text</code></td></tr>
+      <tr><td><code>strrev(s)</code></td><td>Tersine çevir</td><td><code>strrev("abc")</code> → "cba"</td><td>Standart değil, elle yazılabilir</td></tr>
+      <tr><td><code>strlwr(s)</code></td><td>Tümü küçük harf</td><td><code>strlwr("ABC")</code> → "abc"</td><td>Standart değil</td></tr>
+      <tr><td><code>strupr(s)</code></td><td>Tümü büyük harf</td><td><code>strupr("abc")</code> → "ABC"</td><td>Standart değil</td></tr>
+    </tbody>
+  </table>
+
+  <table class="c1">
+    <thead><tr><th style="width:22%">Girdi Yöntemi</th><th>Davranış</th><th style="width:20%">Güvenlik</th></tr></thead>
+    <tbody>
+      <tr><td><code>scanf("%s", str)</code></td><td>Boşlukta durur, sadece ilk kelime</td><td><span class="tag tag-warn">Kısmen güvenli</span></td></tr>
+      <tr><td><code>gets(str)</code></td><td>Satır sonuna kadar okur</td><td><span class="tag tag-bad">KULLANMA — overflow</span></td></tr>
+      <tr><td><code>fgets(str, n, stdin)</code></td><td>n-1 karakter okur, \n de alır</td><td><span class="tag tag-ok">Güvenli ✓</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip"><strong>💡 fgets sonrası:</strong> <code>str[strcspn(str, "\n")] = '\0';</code> ile newline karakterini kaldır.</div>
+</div>
+
+<!-- ===================== 9. FONKSİYON İŞARETÇİLERİ ===================== -->
+<div class="section" id="s9">
+  <div class="section-title">
+    <span class="section-num n2">09</span>
+    <h2>Fonksiyon İşaretçileri</h2>
+  </div>
+
+  <table class="c2">
+    <thead><tr><th style="width:28%">Kavram</th><th>Açıklama</th><th style="width:30%">Örnek</th></tr></thead>
+    <tbody>
+      <tr><td>Tanımlama</td><td><code>tip (*isim)(param_tipleri);</code></td><td><code>int (*pf)(int, int);</code></td></tr>
+      <tr><td>Atama</td><td>Fonksiyon adını ata</td><td><code>pf = topla;</code> veya <code>pf = &topla;</code></td></tr>
+      <tr><td>Çağrı</td><td>2 yol: uzun ve kısa form</td><td><code>(*pf)(5,3)</code> veya <code>pf(5,3)</code></td></tr>
+      <tr><td>Parametre olarak</td><td>Fonksiyona fonksiyon geçir</td><td><code>void sort(int[], int, int(*)(int,int))</code></td></tr>
+      <tr><td>Dizi olarak</td><td>Birden fazla fonksiyonu dizide tut</td><td><code>int (*ops[3])(int,int) = {f1,f2,f3};</code></td></tr>
+      <tr><td>Kullanım alanı</td><td>Callback, sıralama stratejisi, menü seçimi</td><td>Artan/azalan sıralama aynı sort ile</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===================== 10. const İŞARETÇİLER ===================== -->
+<div class="section" id="s10">
+  <div class="section-title">
+    <span class="section-num n3">10</span>
+    <h2>const İşaretçiler</h2>
+  </div>
+
+  <table class="c3">
+    <thead><tr><th>Tanım</th><th>Anlam</th><th>İşaretçi değişir?</th><th>Değer değişir?</th><th>Hafıza İpucu</th></tr></thead>
+    <tbody>
+      <tr><td><code>const int *p</code></td><td>const veriye işaretçi</td><td><span class="tag tag-ok">Evet ✓</span></td><td><span class="tag tag-bad">Hayır ✗</span></td><td>* solunda const → değer kilitli</td></tr>
+      <tr><td><code>int const *p</code></td><td>Yukarıyla aynı</td><td><span class="tag tag-ok">Evet ✓</span></td><td><span class="tag tag-bad">Hayır ✗</span></td><td>Alternatif yazım</td></tr>
+      <tr><td><code>int * const p</code></td><td>const işaretçi</td><td><span class="tag tag-bad">Hayır ✗</span></td><td><span class="tag tag-ok">Evet ✓</span></td><td>* sağında const → adres kilitli</td></tr>
+      <tr><td><code>const int * const p</code></td><td>İkisi de const</td><td><span class="tag tag-bad">Hayır ✗</span></td><td><span class="tag tag-bad">Hayır ✗</span></td><td>Her iki tarafta const → her şey kilitli</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip"><strong>💡 Kolay kural:</strong> <code>const</code> kimin solundaysa O değişmez. <code>*</code>'ın solundaysa değer, sağındaysa işaretçi sabit.</div>
+</div>
+
+<!-- ===================== 11. BUBBLE SORT ===================== -->
+<div class="section" id="s11">
+  <div class="section-title">
+    <span class="section-num n4">11</span>
+    <h2>Bubble Sort</h2>
+  </div>
+
+  <table class="c4">
+    <thead><tr><th style="width:28%">Kavram</th><th>Açıklama</th><th style="width:25%">Değer</th></tr></thead>
+    <tbody>
+      <tr><td>Mantık</td><td>Komşu elemanları karşılaştır, büyüğü sağa kaydır</td><td>Her pass'te en büyük sona "yüzer"</td></tr>
+      <tr><td>Pass sayısı</td><td>n-1 pass (dış döngü)</td><td>İç döngü: n-1-i karşılaştırma</td></tr>
+      <tr><td>Zaman karmaşıklığı</td><td>O(n²) — büyük diziler için yavaş</td><td>n=1000 → 499.500 karşılaştırma</td></tr>
+      <tr><td>Bellek</td><td>O(1) — yerinde sıralama</td><td>Ekstra dizi gerekmez</td></tr>
+      <tr><td>Stabil mi?</td><td>Evet — eşit elemanların sırası korunur</td><td><span class="tag tag-ok">Stabil ✓</span></td></tr>
+      <tr><td>Optimizasyon</td><td>Pass'te hiç swap olmazsa → erken çık</td><td><code>if (!swapped) break;</code></td></tr>
+      <tr><td>takas fonksiyonu</td><td>İki değişkenin değerini değiştir (pointer ile)</td><td><code>void takas(int *a, int *b)</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===================== 12. HATALAR ÖZETİ ===================== -->
+<div class="section" id="s12">
+  <div class="section-title">
+    <span class="section-num n5">12</span>
+    <h2>Yaygın Hatalar & Çözümler</h2>
+  </div>
+
+  <table class="c5">
+    <thead><tr><th>Hata</th><th>Yanlış Kod</th><th>Doğru Kod</th><th>Sonuç</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="tag tag-bad">Memory Leak</span></td>
+        <td><code>malloc(100); return;</code></td>
+        <td><code>free(p); p=NULL; return;</code></td>
+        <td>Bellek boşa gider</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-bad">Dangling Ptr</span></td>
+        <td><code>int x=5; return &x;</code></td>
+        <td>Parametre adresi döndür</td>
+        <td>x silinir → geçersiz adres</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-bad">Buffer Overflow</span></td>
+        <td><code>char d[10]; strcpy(d, "çok uzun...")</code></td>
+        <td><code>strncpy(d, src, 9); d[9]='\0';</code></td>
+        <td>Sınır dışı yazma → crash</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-bad">Double Free</span></td>
+        <td><code>free(p); free(p);</code></td>
+        <td><code>free(p); p=NULL;</code></td>
+        <td>İkinci free → crash</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-bad">NULL Deref</span></td>
+        <td><code>int *p=NULL; *p=5;</code></td>
+        <td><code>if(p!=NULL) *p=5;</code></td>
+        <td>Segfault → crash</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-bad">Prototip yok</span></td>
+        <td>Fonksiyon çağrısı tanımdan önce</td>
+        <td>Prototip yaz veya tanımı öne al</td>
+        <td>Derleme hatası</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div style="text-align:center; padding: 30px 0 50px; color: var(--text-dim); font-size: 0.82rem;">
+  C Programlama — 7 PDF Tamamı · Hafıza Kartı Tabloları · 2024
+</div>
+
+</body>
+</html>
